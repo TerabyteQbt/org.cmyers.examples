@@ -1,0 +1,51 @@
+#!/bin/bash
+
+set -e
+
+if [[ -z "$QBT_ENV_PYTHON" ]]; then
+    echo "This package requires the variable QBT_ENV_PYTHON be set to e.g. '2_7', '3_2', etc" 1>&2
+    exit 1
+fi
+
+eval export PYTHON_BIN=\$PYTHON_${QBT_ENV_PYTHON}_BIN
+if [[ ! -x "$PYTHON_BIN" ]]; then
+    echo "This package requires the variable PYTHON_${QBT_ENV_PYTHON}_BIN be set to the path to a python binary matching that version" 1>&2
+    exit 1
+fi
+
+# If your virtualenv is very large, you may wish to put it elsewhere
+VE=$OUTPUT_REPORTS_DIR/ve
+
+$PYTHON_BIN -m virtualenv $VE
+
+source $VE/bin/activate
+
+# install wheel first if present
+if [[ -f $INPUT_ARTIFACTS_DIR/weak/pypi.wheel/strong/pypi.wheel/python-src/wheel.tar.gz ]]; then
+    pip install $INPUT_ARTIFACTS_DIR/weak/pypi.wheel/strong/pypi.wheel/python-src/wheel.tar.gz
+fi
+
+# install all strong python dependencies
+for type in src egg whl; do
+    ext=$type
+    if [[ "$ext" == "src" ]]; then
+        ext="tar.gz"
+    fi
+    for file in $INPUT_ARTIFACTS_DIR/strong/*/python-$type/*.$ext; do
+        if [[ -f $file ]]; then
+            pip install $file
+        fi
+    done
+done
+
+# build our source and "built" dist
+python setup.py check sdist bdist_wheel
+
+# always put source dist in /src, HOWEVER, always distribute exactly one type of
+# "built" dist, otherwise the code above would install the same package more
+# than once.  So either write to python-src OR python-whl OR python-egg.
+
+mkdir -p $OUTPUT_ARTIFACTS_DIR/{src,python-whl}
+cp dist/*.tar.gz $OUTPUT_ARTIFACTS_DIR/src/
+cp dist/*.whl $OUTPUT_ARTIFACTS_DIR/python-whl/
+
