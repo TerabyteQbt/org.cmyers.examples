@@ -38,6 +38,9 @@ for type in src egg whl; do
     done
 done
 
+# TERRIBLY, if the build dir is not blown away, we can get stale code.  We have
+# to either do this, or move the build to a temp location.
+rm -rf build
 # build our source and "built" dist
 python setup.py check sdist bdist_wheel
 
