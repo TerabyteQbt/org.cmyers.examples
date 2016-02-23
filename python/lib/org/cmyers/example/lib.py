@@ -1,7 +1,7 @@
 
 import sys
 
-class TestLib(object):
+class Lib(object):
     def __init__(self):
         self._developers = [
                 'cmyers',
@@ -13,7 +13,7 @@ class TestLib(object):
 
 
 def main():
-    print "Developers: " + ", ".join(TestLib().developers())
+    print "Developers: " + ", ".join(Lib().developers())
 
 if __name__ == '__main__':
     sys.exit(main())
