@@ -8,10 +8,11 @@ setup(
         author='Carl Myers',
         author_email='cmyers@cmyers.org',
         url='http://www.cmyers.org',
-        packages=['org.cmyers.testapp'],
+        packages=['testapp'],
         entry_points={
             'console_scripts': [
-                'testapp=org.cmyers.testapp:main',
+                'testapp=testapp:main',
+                'example=testapp:example',
             ],
         },
     )

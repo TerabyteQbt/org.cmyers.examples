@@ -42,3 +42,7 @@ for type in src egg whl; do
     done
 done
 
+# ensure virtualenv is relocatable
+#source $VE/bin/deactivate
+python -m virtualenv --relocatable $VE
+
