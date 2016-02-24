@@ -4,8 +4,8 @@ import sys
 class Lib(object):
     def __init__(self):
         self._developers = [
-                'cmyers',
                 'amling',
+                'cmyers',
                 ]
 
     def developers(self):
