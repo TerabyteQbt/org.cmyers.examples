@@ -1,0 +1,8 @@
+package org.cmyers.examples.app;
+
+class Main {
+    public static void main(String[] args) {
+        return 0;
+    }
+}
+
