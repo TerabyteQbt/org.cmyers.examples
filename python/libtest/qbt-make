@@ -38,11 +38,19 @@ for type in src egg whl; do
     done
 done
 
+FAIL=0
 for i in $(find . -type f -name 'test*.py'); do
     OUTPUT=$OUTPUT_REPORTS_DIR/test-results/$i.txt
     mkdir -p $(dirname $OUTPUT)
     python $i 2>&1 | tee $OUTPUT_REPORTS_DIR/test-results/$i.txt
+    RET=${PIPESTATUS[0]}
+    if [[ ! $RET -eq 0 ]]; then
+        echo "Got failure (status $RET) from $i" 1>&2
+        FAIL=$RET
+    fi
 done
+
+exit $FAIL
 
 # TODO: switch to unit2 discover -v
 # TODO: copy other test results into reports dir
