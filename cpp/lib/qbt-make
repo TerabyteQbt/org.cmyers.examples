@@ -1,0 +1,31 @@
+#!/bin/bash
+
+set -e
+
+# C++ library qbt-make file
+
+# ensure GCC path is set
+if [[ -z "$QBT_ENV_GCC" ]]; then
+    echo "You MUST set QBT_ENV_GCC to build this package" 1>&2
+    exit 1
+fi
+
+eval export GCC_BIN=\$GCC_${QBT_ENV_GCC}_BIN
+if [[ ! -x "$GCC_BIN" ]]; then
+    echo "You MUST set GCC_${QBT_ENV_GCC}_BIN to build this package" 1>&2
+    exit 1
+fi
+
+if [[ ! -x "$GCC_BIN" ]]; then
+    echo "You MUST set GCC_${QBT_ENV_GCC}_BIN to point to a g++ compiler binary" 1>&2
+    exit 1
+fi
+
+if [[ ! -x $(which ar) ]]; then
+    echo "You MUST have the 'ar' tool on your path to build this package" 1>&2
+    exit 1
+fi
+
+export CC=$GCC_BIN
+export CFLAGS=${QBT_ENV_CFLAGS}
+make clean && make
