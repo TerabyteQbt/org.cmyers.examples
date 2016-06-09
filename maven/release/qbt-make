@@ -1,0 +1,12 @@
+#!/bin/bash
+
+eval export JAVA_HOME=\$JAVA_${QBT_ENV_JDK}_HOME
+
+set -e
+
+$INPUT_ARTIFACTS_DIR/weak/qbt_fringe.wrapper_generator.release/strong/qbt_fringe.wrapper_generator.release/bin/wrapper_generator \
+    $INPUT_ARTIFACTS_DIR/weak/org.cmyers.examples.maven.app/strong \
+    $OUTPUT_ARTIFACTS_DIR \
+    myapp \
+    org.cmyers.examples.app.Main
+

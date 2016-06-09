@@ -1,0 +1,43 @@
+#!/bin/bash
+
+set -e
+
+eval export JAVA_HOME=\$JAVA_${QBT_ENV_JDK:-1_8}_HOME
+
+if [ -d src ]; then "$INPUT_ARTIFACTS_DIR"/weak/qbt_fringe.linter.release/strong/qbt_fringe.linter.release/bin/linter -d src; fi
+if [ -d test ]; then "$INPUT_ARTIFACTS_DIR"/weak/qbt_fringe.linter.release/strong/qbt_fringe.linter.release/bin/linter -d test; fi
+
+# generate pom.xml with dependencies
+
+echo "<project>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>qbt</groupId>
+    <artifactId>$PACKAGE_NAME-$PACKAGE_CUMULATIVE_VERSION</artifactId>
+    <version>1</version>" > pom.xml
+
+# determine if we have any jars in our dependencies to add to our strong classpath
+if [[ "x$(find $INPUT_ARTIFACTS_DIR/strong -name '*.jar')" != "x" ]]; then
+    echo "    <dependencies>" >> pom.xml
+# UGH - maven won't let you do multiple <systemPath> lines, so we have to have an entire dep block
+# for each jar!!!
+
+    for i in $(find $INPUT_ARTIFACTS_DIR/strong -type f -name '*.jar'); do
+        name="$(basename $i)"
+        echo "    <dependency>
+            <groupId>qbtDeps</groupId>
+            <artifactId>qbtDeps-$name</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>" >> pom.xml
+        echo "            <systemPath>$i</systemPath>" >> pom.xml;
+        echo "        </dependency>" >> pom.xml
+    done
+    echo "    </dependencies>" >> pom.xml
+fi
+
+echo "</project>" >> pom.xml
+
+$INPUT_ARTIFACTS_DIR/weak/3p.maven/strong/3p.maven/bin/mvn clean test package
+
+# copy results to artifact dir
+mkdir -p $OUTPUT_ARTIFACTS_DIR/jars
+cp target/*.jar $OUTPUT_ARTIFACTS_DIR/jars/
