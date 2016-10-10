@@ -1,0 +1,39 @@
+#!/bin/bash
+
+set -e
+set -x
+
+export GPP_LIBS="-lpthread" # this is the place to add -lm, -lpthreads, etc
+export GPP_INCLUDES="" # any includes in your dependent packages will automatically be added
+
+eval export GPP_BIN=\$GPP_${QBT_ENV_GPP:-5_3}_BIN
+export GPP_FLAGS="-Wall -Werror -fPIC -v -DPACKAGE_NAME='$PACKAGE_NAME' -DPACKAGE_CUMULATIVE_VERSION='$PACKAGE_CUMULATIVE_VERSION'"
+
+if [ -n $QBT_ENV_GPP_EXTRA_FLAGS ]; then
+    export GPP_FLAGS="$GPP_FLAGS $QBT_ENV_GPP_EXTRA_FLAGS"
+fi
+
+# collect includes from strong deps
+for i in $(find $INPUT_ARTIFACTS_DIR/strong -maxdepth 2 -type d -name 'includes'); do
+    export GPP_INCLUDES="$GPP_INCLUDES -I$i"
+done
+
+# collect object files from strong deps
+for i in $(find $INPUT_ARTIFACTS_DIR/strong -maxdepth 2 -type d -name 'libs'); do
+    for j in $(find $i -type f -name '*.o' -o -name '*.a'); do
+        export GPP_LIBS="$GPP_LIBS $j"
+    done
+done
+
+# collect source files
+for i in $(find . -type f -name '*.c' -o -name '*.cc' -o -name '*.cpp' -o -name '*.cxx' -o -name '*.c++'); do
+    export GPP_SOURCES="$GPP_SOURCES $i"
+done
+
+
+# Produce test binary and run it
+mkdir -p $OUTPUT_ARTIFACTS_DIR/bin
+# NOTE(cmyers): GPP_SOURCES *must* appear before $GPP_LIBS...because stupid.
+$GPP_BIN $GPP_FLAGS $GPP_SOURCES $GPP_INCLUDES $GPP_LIBS -o $OUTPUT_ARTIFACTS_DIR/bin/lib_test
+
+$OUTPUT_ARTIFACTS_DIR/bin/lib_test
