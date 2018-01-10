@@ -6,6 +6,7 @@ class Lib(object):
         self._developers = [
                 'amling',
                 'cmyers',
+                'qbt',
                 ]
 
     def developers(self):

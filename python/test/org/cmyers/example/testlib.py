@@ -9,6 +9,7 @@ class TestLib(unittest2.TestCase):
         self._expected_developers = [
                 'amling',
                 'cmyers',
+                'qbt',
         ]
     def test_developers(self):
         self.assertEqual(self._expected_developers, self.widget.developers())
